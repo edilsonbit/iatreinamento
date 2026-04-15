@@ -1,9 +1,13 @@
 # Treinamento Dev + IA com GitHub Copilot
 
 Material de treinamento com:
-- Apresentacao em HTML estilo deck: `apresentacao-treinamento-copilot.html`
+- Apresentacao em HTML estilo deck: `index.html`
 - Guia de treinamento em Markdown: `guia-treinamento-copilot.md`
 - Logo da ICS: `ics_novo_logo-transparente.png`
+
+## Acesso online (GitHub Pages)
+
+https://edilsonbit.github.io/iatreinamento
 
 ## Como executar localmente
 
@@ -17,5 +21,5 @@ Abra no navegador:
 ## Estrutura
 
 - `.vscode/launch.json` para debug no VS Code
-- `apresentacao-treinamento-copilot.html` deck interativo
+- `index.html` deck interativo (entrada do GitHub Pages)
 - `guia-treinamento-copilot.md` roteiro completo
