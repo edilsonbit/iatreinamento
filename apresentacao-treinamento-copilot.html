@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Treinamento Dev + IA | ICS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --gold: #f6b800;
+      --gold-soft: #ffcf3d;
+      --black: #0c0d11;
+      --charcoal: #1a1c23;
+      --ink: #111218;
+      --cream: #f8f3e8;
+      --mist: #f1eadc;
+      --white: #ffffff;
+      --ok: #12966f;
+      --warn: #d9532e;
+      --line: rgba(255, 255, 255, 0.2);
+      --shadow: 0 18px 45px rgba(4, 4, 6, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--black);
+      color: var(--white);
+      font-family: "Manrope", sans-serif;
+    }
+
+    .stage {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      isolation: isolate;
+      background:
+        radial-gradient(circle at 10% 18%, rgba(246, 184, 0, 0.35), transparent 30%),
+        radial-gradient(circle at 85% 12%, rgba(255, 207, 61, 0.15), transparent 28%),
+        linear-gradient(145deg, #0d0e12 0%, #171922 47%, #1a1e27 100%);
+    }
+
+    .noise {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.1;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.4) 0.5px, transparent 0.5px);
+      background-size: 2px 2px;
+      mix-blend-mode: soft-light;
+      z-index: -1;
+    }
+
+    .deck {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      transition: transform 560ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      flex: 0 0 100vw;
+      padding: clamp(1rem, 2.5vw, 2rem);
+      display: grid;
+      align-content: stretch;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel {
+      width: min(1180px, 96vw);
+      margin: auto;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+      background: linear-gradient(145deg, rgba(10, 11, 15, 0.9), rgba(22, 24, 31, 0.9));
+      padding: clamp(1rem, 2.5vw, 2.3rem);
+      min-height: min(86vh, 860px);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: clamp(0.9rem, 2vw, 1.4rem);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      right: -75px;
+      top: -75px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, var(--gold-soft), rgba(246, 184, 0, 0.22) 60%, transparent 70%);
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+      padding-bottom: 0.8rem;
+      z-index: 2;
+    }
+
+    .brand-left {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .brand-logo {
+      width: clamp(84px, 10vw, 118px);
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.45));
+      border-radius: 8px;
+      background: transparent;
+    }
+
+    .logo-fallback {
+      display: none;
+      width: clamp(84px, 10vw, 118px);
+      height: clamp(52px, 7vw, 68px);
+      border-radius: 12px;
+      background: var(--gold);
+      color: var(--black);
+      font-family: "Syne", sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.2rem, 2.3vw, 1.6rem);
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0.06em;
+    }
+
+    .eyebrow {
+      font-size: 0.82rem;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.74);
+      margin-bottom: 0.2rem;
+    }
+
+    .brand-title {
+      font-family: "Syne", sans-serif;
+      font-size: clamp(1rem, 1.8vw, 1.4rem);
+      font-weight: 700;
+      color: var(--gold-soft);
+    }
+
+    .chip {
+      border: 1px solid rgba(246, 184, 0, 0.55);
+      border-radius: 999px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--gold);
+      background: rgba(246, 184, 0, 0.09);
+      white-space: nowrap;
+    }
+
+    .content {
+      display: grid;
+      gap: clamp(0.7rem, 1.6vw, 1.2rem);
+      align-content: center;
+      z-index: 2;
+    }
+
+    h1,
+    h2 {
+      font-family: "Syne", sans-serif;
+      letter-spacing: -0.01em;
+      line-height: 1.07;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 6.4vw, 4.6rem);
+      max-width: 17ch;
+    }
+
+    h2 {
+      font-size: clamp(1.55rem, 3.5vw, 3rem);
+      color: var(--gold-soft);
+      max-width: 22ch;
+    }
+
+    p {
+      font-size: clamp(1rem, 1.6vw, 1.18rem);
+      color: rgba(255, 255, 255, 0.9);
+      max-width: 66ch;
+    }
+
+    .accent {
+      color: var(--gold-soft);
+    }
+
+    .kpi-grid,
+    .two-col,
+    .triple {
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    .two-col {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .triple {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .card {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 0.9rem;
+      background: linear-gradient(165deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.01));
+    }
+
+    .card h3 {
+      font-family: "Syne", sans-serif;
+      font-size: 1rem;
+      margin-bottom: 0.45rem;
+      color: var(--gold-soft);
+    }
+
+    .card p,
+    .card li {
+      font-size: 0.96rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    ul {
+      margin-left: 1rem;
+      display: grid;
+      gap: 0.32rem;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.7rem;
+    }
+
+    .step {
+      border: 1px solid rgba(246, 184, 0, 0.36);
+      border-radius: 14px;
+      background: rgba(246, 184, 0, 0.06);
+      padding: 0.75rem;
+    }
+
+    .step strong {
+      display: block;
+      margin-bottom: 0.25rem;
+      color: var(--gold-soft);
+      font-family: "Syne", sans-serif;
+      font-size: 0.97rem;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.08rem 0.35rem;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      font-size: 0.92em;
+    }
+
+    .mono-block {
+      display: block;
+      line-height: 1.55;
+      padding: 0.55rem 0.65rem;
+    }
+
+    .good {
+      color: #3ecf95;
+      font-weight: 700;
+    }
+
+    .warn {
+      color: #ff8966;
+      font-weight: 700;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.13);
+      padding-top: 0.7rem;
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 0.88rem;
+    }
+
+    .controls {
+      position: fixed;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      background: rgba(6, 6, 8, 0.74);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 999px;
+      padding: 0.36rem 0.45rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      width: 38px;
+      height: 38px;
+      background: rgba(246, 184, 0, 0.16);
+      color: var(--gold-soft);
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 140ms ease, background 140ms ease;
+    }
+
+    .btn:hover,
+    .btn:focus-visible {
+      background: rgba(246, 184, 0, 0.32);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .counter {
+      min-width: 88px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.15);
+      z-index: 50;
+    }
+
+    .bar {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold) 0%, var(--gold-soft) 100%);
+      transition: width 350ms ease;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 500ms ease, transform 500ms ease;
+    }
+
+    .active .reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .active .reveal:nth-child(1) { transition-delay: 90ms; }
+    .active .reveal:nth-child(2) { transition-delay: 150ms; }
+    .active .reveal:nth-child(3) { transition-delay: 220ms; }
+    .active .reveal:nth-child(4) { transition-delay: 300ms; }
+    .active .reveal:nth-child(5) { transition-delay: 380ms; }
+
+    @media (max-width: 980px) {
+      .two-col,
+      .triple,
+      .timeline {
+        grid-template-columns: 1fr;
+      }
+
+      .chip {
+        display: none;
+      }
+
+      .panel {
+        min-height: auto;
+        height: 94vh;
+      }
+
+      .brand {
+        padding-bottom: 0.5rem;
+      }
+
+      .footer {
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" aria-hidden="true">
+    <div class="bar" id="progressBar"></div>
+  </div>
+
+  <div class="stage">
+    <div class="noise"></div>
+
+    <div class="deck" id="deck">
+      <section class="slide active">
+        <article class="panel">
+          <header class="brand">
+            <div class="brand-left">
+              <img src="ics_novo_logo-transparente.png" alt="ICS logo" class="brand-logo" id="brandLogo" />
+              <div class="logo-fallback" id="logoFallback">ICS</div>
+              <div>
+                <div class="eyebrow">Innovation, Cloud & Solutions</div>
+                <div class="brand-title">Treinamento Dev + IA</div>
+              </div>
+            </div>
+            <div class="chip">Deck interativo HTML</div>
+          </header>
+
+          <div class="content">
+            <h1 class="reveal">Desenvolvimento assistido por IA com <span class="accent">GitHub Copilot</span></h1>
+            <p class="reveal">Uma mudanca pratica de operacao: o dev para de digitar tudo do zero e passa a pilotar contexto, revisar codigo e validar com testes.</p>
+            <div class="two-col reveal">
+              <div class="card">
+                <h3>Objetivo de negocio</h3>
+                <p>Aumentar velocidade de entrega sem comprometer qualidade tecnica.</p>
+              </div>
+              <div class="card">
+                <h3>Resultado esperado</h3>
+                <p>Mais throughput por squad, PRs mais claras e menor retrabalho em QA.</p>
+              </div>
+            </div>
+          </div>
+
+          <footer class="footer">
+            <span>Treinamento interno ICS</span>
+            <span>Slide 1</span>
+          </footer>
+        </article>
+      </section>
+
+      <section class="slide">
+        <article class="panel">
+          <header class="brand">
+            <div class="brand-left">
+              <img src="ics_novo_logo-transparente.png" alt="ICS logo" class="brand-logo" />
+              <div>
+                <div class="eyebrow">Mindset</div>
+                <div class="brand-title">Papel do desenvolvedor na era IA</div>
+              </div>
+            </div>
+            <div class="chip">IA como copiloto</div>
+          </header>
+
+          <div class="content">
+            <h2 class="reveal">Mudanca de modelo operacional</h2>
+            <div class="triple reveal">
+              <div class="card">
+                <h3>Antes</h3>
+                <ul>
+                  <li>Foco em escrever todo o codigo manualmente.</li>
+                  <li>Ciclos longos de tentativa e erro.</li>
+                  <li>Revisao tardia.</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Agora</h3>
+                <ul>
+                  <li>Prompts com contexto e criterio de aceite.</li>
+                  <li>Codigo sugerido e refinado por iteracao curta.</li>
+                  <li>Revisao continua + testes desde o inicio.</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Responsabilidade humana</h3>
+                <ul>
+                  <li>Corretude da regra de negocio.</li>
+                  <li>Seguranca e privacidade.</li>
+                  <li>Performance e manutencao futura.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <footer class="footer">
+            <span>Dev continua dono da qualidade</span>
+            <span>Slide 2</span>
+          </footer>
+        </article>
+      </section>
+
+      <section class="slide">
+        <article class="panel">
+          <header class="brand">
+            <div class="brand-left">
+              <img src="ics_novo_logo-transparente.png" alt="ICS logo" class="brand-logo" />
+              <div>
+                <div class="eyebrow">Ferramenta</div>
+                <div class="brand-title">Copilot no VS Code</div>
+              </div>
+            </div>
+            <div class="chip">Fluxo pratico</div>
+          </header>
+
+          <div class="content">
+            <h2 class="reveal">Fluxo recomendado no editor</h2>
+            <div class="timeline reveal">
+              <div class="step"><strong>1. Planejar</strong>Resuma o ticket no chat e gere plano em etapas.</div>
+              <div class="step"><strong>2. Implementar</strong>Use sugestoes inline e prompts pontuais por arquivo.</div>
+              <div class="step"><strong>3. Validar</strong>Gere testes com <span class="mono">/tests</span> e rode localmente.</div>
+              <div class="step"><strong>4. Revisar</strong>Use <span class="mono">/fix</span> e peca riscos de regressao.</div>
+            </div>
+            <div class="two-col reveal">
+              <div class="card">
+                <h3>Comandos uteis</h3>
+                <ul>
+                  <li><span class="mono">/explain</span> para codigo legado.</li>
+                  <li><span class="mono">/fix</span> para erro/lint com contexto.</li>
+                  <li><span class="mono">/tests</span> para cobertura inicial.</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Regra de ouro</h3>
+                <p>Nunca finalizar sem revisar diff e executar testes do modulo alterado.</p>
+              </div>
+            </div>
+          </div>
+
+          <footer class="footer">
+            <span>Foco em ciclos curtos</span>
+            <span>Slide 3</span>
+          </footer>
+        </article>
+      </section>
+
+      <section class="slide">
+        <article class="panel">
+          <header class="brand">
+            <div class="brand-left">
+              <img src="ics_novo_logo-transparente.png" alt="ICS logo" class="brand-logo" />
+              <div>
+                <div class="eyebrow">Ferramenta</div>
+                <div class="brand-title">Copilot no GitHub</div>
+              </div>
+            </div>
+            <div class="chip">Review melhor</div>
+          </header>
+
+          <div class="content">
+            <h2 class="reveal">Uso no ciclo de pull request</h2>
+            <div class="two-col reveal">
+              <div class="card">
+                <h3>Antes de abrir PR</h3>
+                <ul>
+                  <li>Gerar resumo tecnico objetivo.</li>
+                  <li>Listar riscos e impactos.</li>
+                  <li>Anexar evidencias de teste.</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Durante review</h3>
+                <ul>
+                  <li>Inspecionar regressao funcional.</li>
+                  <li>Detectar possiveis falhas de seguranca.</li>
+                  <li>Melhorar clareza dos comentarios.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="card reveal">
+              <h3>Frase-chave para o time</h3>
+              <p><span class="good">IA acelera a conversao de ideia em diff.</span> A aprovacao continua baseada em engenharia, testes e padroes.</p>
+            </div>
+          </div>
+
+          <footer class="footer">
+            <span>Qualidade de review acima de velocidade</span>
+            <span>Slide 4</span>
+          </footer>
+        </article>
+      </section>
+
+      <section class="slide">
+        <article class="panel">
+          <header class="brand">
+            <div class="brand-left">
+              <img src="ics_novo_logo-transparente.png" alt="ICS logo" class="brand-logo" />
+              <div>
+                <div class="eyebrow">Padroes</div>
+                <div class="brand-title">Convencoes de mercado</div>
+              </div>
+            </div>
+            <div class="chip">Governanca tecnica</div>
+          </header>
+
+          <div class="content">
+            <h2 class="reveal">Padroes para escalar produtividade</h2>
+            <div class="triple reveal">
+              <div class="card">
+                <h3>Branch naming</h3>
+                <p><span class="mono">feat/payments-add-refund-endpoint</span></p>
+                <p><span class="mono">fix/users-handle-empty-display-name</span></p>
+              </div>
+              <div class="card">
+                <h3>Conventional commit</h3>
+                <p><span class="mono">feat(auth): 20260415_1234 add token rotation</span></p>
+                <p><span class="mono">fix(api): 20260415_1279 validate empty email</span></p>
+              </div>
+              <div class="card">
+                <h3>PR padronizado</h3>
+                <ul>
+                  <li>Contexto e objetivo</li>
+                  <li>Mudancas tecnicas</li>
+                  <li>Riscos e testes</li>
+                </ul>
+              </div>
+            </div>
+            <div class="card reveal">
+              <h3>Nomenclatura de codigo</h3>
+              <p><span class="good">Bom:</span> <span class="mono">calculateInvoiceTotal</span> | <span class="warn">Evitar:</span> <span class="mono">calc</span></p>
+            </div>
+          </div>
+
+          <footer class="footer">
+            <span>Padrao reduz friccao e retrabalho</span>
+            <span>Slide 5</span>
+          </footer>
+        </article>
+      </section>
+
+      <section class="slide">
+        <article class="panel">
+          <header class="brand">
+            <div class="brand-left">
+              <img src="ics_novo_logo-transparente.png" alt="ICS logo" class="brand-logo" />
+              <div>
+                <div class="eyebrow">Glossario</div>
+                <div class="brand-title">Nomenclaturas do time</div>
+              </div>
+            </div>
+            <div class="chip">10 termos-chave</div>
+          </header>
+
+          <div class="content">
+            <h2 class="reveal">Glossario rapido para nivelar linguagem</h2>
+            <div class="two-col reveal">
+              <div class="card">
+                <h3>Termos de fluxo</h3>
+                <ul>
+                  <li><span class="mono">diff</span>: diferenca entre versao antiga e nova do codigo.</li>
+                  <li><span class="mono">commit</span>: pacote pequeno de alteracoes versionadas.</li>
+                  <li><span class="mono">branch</span>: linha isolada de trabalho.</li>
+                  <li><span class="mono">PR</span>: pedido de revisao para integrar mudancas.</li>
+                  <li><span class="mono">review</span>: validacao tecnica do PR.</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Termos de entrega</h3>
+                <ul>
+                  <li><span class="mono">issue</span>: item rastreavel no backlog.</li>
+                  <li><span class="mono">hotfix</span>: correcao urgente em producao.</li>
+                  <li><span class="mono">rollback</span>: retorno para versao estavel anterior.</li>
+                  <li><span class="mono">rebase</span>: reaplicar commits sobre base atualizada.</li>
+                  <li><span class="mono">squash</span>: juntar varios commits em um.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="card reveal">
+              <h3>Padrao de commit rastreavel</h3>
+              <p><span class="mono">tipo(escopo): yyyymmdd_numerodaissue descricao-curta</span></p>
+            </div>
+          </div>
+
+          <footer class="footer">
+            <span>Todos falando a mesma linguagem tecnica</span>
+            <span>Slide 6</span>
+          </footer>
+        </article>
+      </section>
+
+      <section class="slide">
+        <article class="panel">
+          <header class="brand">
+            <div class="brand-left">
+              <img src="ics_novo_logo-transparente.png" alt="ICS logo" class="brand-logo" />
+              <div>
+                <div class="eyebrow">Prompt Engineering</div>
+                <div class="brand-title">Prompt que gera resultado util</div>
+              </div>
+            </div>
+            <div class="chip">Template oficial</div>
+          </header>
+
+          <div class="content">
+            <h2 class="reveal">Estrutura de prompt para devs</h2>
+            <div class="card reveal">
+              <p><span class="mono mono-block">Voce e um engenheiro senior.<br>Contexto: [stack/modulo].<br>Objetivo: [entrega].<br>Regras: [arquitetura, seguranca, testes].<br>Saida: [codigo, testes, riscos, checklist].</span></p>
+            </div>
+            <div class="two-col reveal">
+              <div class="card">
+                <h3>Funciona melhor quando:</h3>
+                <ul>
+                  <li>Ha contexto real do repositorio.</li>
+                  <li>A tarefa e quebrada em passos pequenos.</li>
+                  <li>Voce pede alternativas com trade-off.</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Falha quando:</h3>
+                <ul>
+                  <li>Prompt vago e sem restricao tecnica.</li>
+                  <li>Nao existe criterio de aceite definido.</li>
+                  <li>Sugestao e aceita sem validacao humana.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <footer class="footer">
+            <span>Prompt bom gera diff melhor</span>
+            <span>Slide 7</span>
+          </footer>
+        </article>
+      </section>
+
+      <section class="slide">
+        <article class="panel">
+          <header class="brand">
+            <div class="brand-left">
+              <img src="ics_novo_logo-transparente.png" alt="ICS logo" class="brand-logo" />
+              <div>
+                <div class="eyebrow">Pratica</div>
+                <div class="brand-title">Laboratorio em squad</div>
+              </div>
+            </div>
+            <div class="chip">70% hands-on</div>
+          </header>
+
+          <div class="content">
+            <h2 class="reveal">Exercicio de treinamento</h2>
+            <div class="two-col reveal">
+              <div class="card">
+                <h3>Cenario</h3>
+                <p>Entregar uma feature de API com validacao, testes e PR completo em 90 minutos.</p>
+              </div>
+              <div class="card">
+                <h3>Criterios de avaliacao</h3>
+                <ul>
+                  <li>Qualidade do diff</li>
+                  <li>Cobertura de testes</li>
+                  <li>Clareza da PR</li>
+                  <li>Aderencia aos padroes</li>
+                </ul>
+              </div>
+            </div>
+            <div class="timeline reveal">
+              <div class="step"><strong>Fase 1</strong>Planejar com IA</div>
+              <div class="step"><strong>Fase 2</strong>Implementar</div>
+              <div class="step"><strong>Fase 3</strong>Testar</div>
+              <div class="step"><strong>Fase 4</strong>Review cruzado</div>
+            </div>
+          </div>
+
+          <footer class="footer">
+            <span>Aprendizado orientado a entrega real</span>
+            <span>Slide 8</span>
+          </footer>
+        </article>
+      </section>
+
+      <section class="slide">
+        <article class="panel">
+          <header class="brand">
+            <div class="brand-left">
+              <img src="ics_novo_logo-transparente.png" alt="ICS logo" class="brand-logo" />
+              <div>
+                <div class="eyebrow">Medicao</div>
+                <div class="brand-title">KPIs de adocao</div>
+              </div>
+            </div>
+            <div class="chip">30 a 60 dias</div>
+          </header>
+
+          <div class="content">
+            <h2 class="reveal">Como provar ganho de produtividade</h2>
+            <div class="triple reveal">
+              <div class="card">
+                <h3>Lead time</h3>
+                <p>Meta inicial: reduzir de 15% a 25%.</p>
+              </div>
+              <div class="card">
+                <h3>Tempo de review</h3>
+                <p>Meta inicial: reduzir de 10% a 20%.</p>
+              </div>
+              <div class="card">
+                <h3>Retrabalho</h3>
+                <p>Meta: reduzir bugs apos QA e reaberturas.</p>
+              </div>
+            </div>
+            <div class="card reveal">
+              <h3>Governanca do rollout</h3>
+              <ul>
+                <li>Semana 1: padroes minimos e champions.</li>
+                <li>Semana 2: pair programming com Copilot.</li>
+                <li>Semana 3: ajuste por metricas reais.</li>
+                <li>Semana 4: publicacao do playbook oficial.</li>
+              </ul>
+            </div>
+          </div>
+
+          <footer class="footer">
+            <span>Medir para evoluir</span>
+            <span>Slide 9</span>
+          </footer>
+        </article>
+      </section>
+
+      <section class="slide">
+        <article class="panel">
+          <header class="brand">
+            <div class="brand-left">
+              <img src="ics_novo_logo-transparente.png" alt="ICS logo" class="brand-logo" />
+              <div>
+                <div class="eyebrow">Fechamento</div>
+                <div class="brand-title">Proximo passo</div>
+              </div>
+            </div>
+            <div class="chip">Acao imediata</div>
+          </header>
+
+          <div class="content">
+            <h2 class="reveal">Plano de acao para iniciar ja</h2>
+            <div class="two-col reveal">
+              <div class="card">
+                <h3>Amanha</h3>
+                <ul>
+                  <li>Padronizar commit, branch e PR.</li>
+                  <li>Definir template oficial de prompt.</li>
+                  <li>Rodar 1 piloto com uma squad.</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>Em 30 dias</h3>
+                <ul>
+                  <li>Consolidar metricas de produtividade.</li>
+                  <li>Refinar checklist de qualidade.</li>
+                  <li>Expandir para todos os times.</li>
+                </ul>
+              </div>
+            </div>
+            <p class="reveal"><span class="accent">Mensagem final:</span> desenvolver com IA nao e terceirizar decisao tecnica. E acelerar execucao com engenharia disciplinada.</p>
+          </div>
+
+          <footer class="footer">
+            <span>Obrigado | ICS Innovation, Cloud & Solutions</span>
+            <span>Slide 10</span>
+          </footer>
+        </article>
+      </section>
+    </div>
+  </div>
+
+  <nav class="controls" aria-label="Controles da apresentacao">
+    <button class="btn" id="prevBtn" aria-label="Slide anterior">&#10094;</button>
+    <div class="counter" id="counter">1 / 10</div>
+    <button class="btn" id="nextBtn" aria-label="Proximo slide">&#10095;</button>
+  </nav>
+
+  <script>
+    (function () {
+      const deck = document.getElementById("deck");
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      const nextBtn = document.getElementById("nextBtn");
+      const prevBtn = document.getElementById("prevBtn");
+      const counter = document.getElementById("counter");
+      const progressBar = document.getElementById("progressBar");
+      const brandLogo = document.getElementById("brandLogo");
+      const logoFallback = document.getElementById("logoFallback");
+
+      let index = 0;
+
+      function updateSlide() {
+        deck.style.transform = "translateX(" + (-index * 100) + "vw)";
+
+        slides.forEach((slide, i) => {
+          slide.classList.toggle("active", i === index);
+        });
+
+        counter.textContent = (index + 1) + " / " + slides.length;
+        progressBar.style.width = ((index + 1) / slides.length) * 100 + "%";
+
+        prevBtn.disabled = index === 0;
+        nextBtn.disabled = index === slides.length - 1;
+      }
+
+      function next() {
+        if (index < slides.length - 1) {
+          index += 1;
+          updateSlide();
+        }
+      }
+
+      function prev() {
+        if (index > 0) {
+          index -= 1;
+          updateSlide();
+        }
+      }
+
+      nextBtn.addEventListener("click", next);
+      prevBtn.addEventListener("click", prev);
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+          event.preventDefault();
+          next();
+        }
+
+        if (event.key === "ArrowLeft" || event.key === "PageUp") {
+          event.preventDefault();
+          prev();
+        }
+
+        if (event.key.toLowerCase() === "f") {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(function () {});
+          } else {
+            document.exitFullscreen().catch(function () {});
+          }
+        }
+      });
+
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      document.addEventListener("touchstart", function (event) {
+        touchStartX = event.changedTouches[0].screenX;
+      }, { passive: true });
+
+      document.addEventListener("touchend", function (event) {
+        touchEndX = event.changedTouches[0].screenX;
+        const delta = touchEndX - touchStartX;
+
+        if (delta < -45) {
+          next();
+        } else if (delta > 45) {
+          prev();
+        }
+      }, { passive: true });
+
+      if (brandLogo) {
+        brandLogo.addEventListener("error", function () {
+          brandLogo.style.display = "none";
+          if (logoFallback) {
+            logoFallback.style.display = "flex";
+          }
+        });
+      }
+
+      updateSlide();
+    })();
+  </script>
+</body>
+</html>
