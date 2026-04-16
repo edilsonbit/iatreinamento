@@ -166,6 +166,53 @@ Boas praticas:
 - Pedir alternativas com trade-offs.
 - Pedir casos de teste e riscos antes de finalizar.
 
+### 6.1 Comandos com barra no Copilot Chat (ex.: /teste)
+
+O que sao:
+- Comandos com barra (/) sao atalhos de intencao no chat.
+- Eles ajudam o Copilot a entender mais rapido o tipo de ajuda esperada (explicar, corrigir, gerar testes, revisar, etc.).
+- Exemplo pratico: em vez de escrever um prompt longo, voce comeca com um comando e completa com o contexto.
+
+Como usar em aula (passo a passo):
+1. Abrir o Copilot Chat no VS Code.
+2. Digitar apenas `/` para listar os comandos disponiveis no ambiente.
+3. Escolher o comando exibido na lista.
+4. Completar com contexto tecnico: arquivo, regra de negocio, stack e restricoes.
+5. Pedir saida objetiva: codigo, testes, riscos e checklist.
+
+Observacao importante:
+- Os nomes dos comandos podem variar por versao de extensao e configuracao do ambiente.
+- Se `/teste` nao aparecer, use o comando equivalente exibido na lista (ex.: `/tests`) ou descreva em linguagem natural.
+
+10 exemplos prontos para usar no treinamento:
+1. `/tests Gere testes unitarios para este service cobrindo caminho feliz, validacao e excecao.`
+2. `/fix Corrija este erro de null reference sem quebrar compatibilidade.`
+3. `/explain Explique este metodo para uma pessoa dev junior em 5 passos.`
+4. `/review Revise o diff aberto e liste riscos de regressao e pontos sem teste.`
+5. `/doc Gere documentacao curta deste endpoint com payload, retorno e erros.`
+6. `/refactor Refatore este trecho para melhorar legibilidade sem mudar comportamento.`
+7. `/optimize Sugira melhorias de performance e mostre trade-offs.`
+8. `/generate Crie implementacao inicial seguindo clean code e validacoes de entrada.`
+9. `/help Liste boas praticas para usar Copilot neste repositorio sem vazar dados sensiveis.`
+10. `/teste Gere cenarios de teste de API com casos de sucesso, erro de negocio e erro de autenticacao.`
+
+Prompt de apoio (quando comando com barra nao existir):
+
+```text
+Atue como engenheiro de software senior.
+Objetivo: gerar testes para [arquivo/modulo].
+Contexto: [regra de negocio + stack].
+Regras: incluir caminho feliz, erros de validacao e edge cases.
+Saida: codigo de teste + breve explicacao + riscos de cobertura.
+```
+
+Mini roteiro de demonstracao (15 min):
+1. Mostrar a lista de comandos com `/`.
+2. Executar um exemplo de explicacao (`/explain`).
+3. Executar um exemplo de testes (`/tests` ou equivalente).
+4. Comparar resultado com prompt sem barra.
+5. Fechar com a regra: comando define intencao; contexto define qualidade da resposta.
+
 ## 7. Exercicio pratico em sala
 
 Cenario sugerido:
