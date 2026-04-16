@@ -23,3 +23,5 @@ Abra no navegador:
 - `.vscode/launch.json` para debug no VS Code
 - `index.html` deck interativo (entrada do GitHub Pages)
 - `guia-treinamento-copilot.md` roteiro completo
+
+## Novo Tópico
