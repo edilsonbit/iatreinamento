@@ -2,6 +2,30 @@
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    //
+    // ─── COMO EXECUTAR O PROJETO LOCALMENTE ─────────────────────────────────────
+    //
+    // 1. Abra um terminal na raiz do projeto (c:\Projetos\github_project).
+    //
+    // 2. Suba o servidor de arquivos estáticos com o comando:
+    //      npx --yes serve . -l 8080
+    //
+    //    O terminal mostrará:
+    //      ┌─────────────────────────────────────────┐
+    //      │  Serving!                               │
+    //      │  - Local:   http://localhost:8080       │
+    //      │  - Network: http://<seu-ip>:8080        │
+    //      └─────────────────────────────────────────┘
+    //
+    // 3. Com o servidor rodando, pressione F5 (ou clique em "Run > Start Debugging")
+    //    para abrir o Chrome apontado para http://localhost:8080.
+    //    A configuração abaixo cuida disso automaticamente.
+    //
+    // 4. Para parar o servidor, pressione Ctrl+C no terminal onde ele está rodando.
+    //
+    // Pré-requisito: Node.js instalado (https://nodejs.org).
+    //    Verifique com: node -v
+    // ─────────────────────────────────────────────────────────────────────────────
     "version": "0.2.0",
     "configurations": [
         {
